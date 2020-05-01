@@ -104,8 +104,8 @@ for dataset in combine:
 
 print(train['Age'].unique())
 
-# # Check the average survival rate based on age ranges.
-# #print(train[['Age', 'Survived']].groupby(['Age'], as_index=False).mean())
+# Check the average survival rate based on age ranges.
+print(train[['Age', 'Survived']].groupby(['Age'], as_index=False).mean())
 
 
 # # Create new feature based on family size:
