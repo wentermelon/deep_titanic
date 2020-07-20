@@ -4,8 +4,11 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 import tensorflow as tf
 import keras
+import os
 
-train = pd.read_csv("train.csv")
+os.chdir(os.path.dirname(__file__))
+
+train = pd.read_csv(r'train.csv')
 test = pd.read_csv("test.csv")
 combine = [ train, test ]
 
@@ -102,40 +105,45 @@ for dataset in combine:
     # Seniors
     dataset.loc[ dataset['Age'] > 65, 'Age' ] = 5
 
-print(train['Age'].unique())
+# print(train['Age'].unique())
 
 # Check the average survival rate based on age ranges.
-print(train[['Age', 'Survived']].groupby(['Age'], as_index=False).mean())
+# print(train[['Age', 'Survived']].groupby(['Age'], as_index=False).mean())
 
 
 # # Create new feature based on family size:
 # # SibSp -> Siblings + Spouse(s)
 # # Parch -> Parents + Children
 # # +1 to include the person in question.
-# for dataset in combine:
-#     dataset['FamilySize'] = dataset['SibSp'] + dataset['Parch'] + 1
+for dataset in combine:
+    dataset['FamilySize'] = dataset['SibSp'] + dataset['Parch'] + 1
+ 
+# Check the average survival rate based on family size.
+# print(train[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean())
 
-# # Check the average survival rate based on family size.
-# # print(train[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean())
+# Remove SibSp and Parch features because it is accounted for in FamilySize.
+train = train.drop( ['Parch', 'SibSp'], axis=1)
+test = test.drop( ['Parch', 'SibSp'], axis=1)
+combine = [train, test]
 
-# # Remove SibSp and Parch features because it is accounted for in FamilySize.
-# train = train.drop( ['Parch', 'SibSp'], axis=1)
-# test = test.drop( ['Parch', 'SibSp'], axis=1)
-# combine = [train, test]
+most_frequent_port = train.Embarked.dropna().mode()[0]
 
-# most_frequent_port = train.Embarked.dropna().mode()[0]
+port_mapping = { 'S': 1,
+                 'C': 2,
+                 'Q': 3 }
 
-# port_mapping = { 'S': 1,
-#                  'C': 2,
-#                  'Q': 3 }
+for dataset in combine:
+    dataset['Embarked'] = dataset['Embarked'].fillna(most_frequent_port)
+    dataset['Embarked'] = dataset['Embarked'].map(port_mapping).astype(int)
 
-# for dataset in combine:
-#     dataset['Embarked'] = dataset['Embarked'].fillna(most_frequent_port)
-#     dataset['Embarked'] = dataset['Embarked'].map(port_mapping).astype(int)
+# print(train[['Embarked', 'Survived']].groupby(['Embarked']).mean())
 
-# # print(train[['Embarked', 'Survived']].groupby(['Embarked']).mean())
+# print( train.loc[ train['Age'].isnull() ] )
 
-# # print( train.loc[ train['Age'].isnull() ] )
+print(train.head())
+print(test.head())
+
+
 
 
 
