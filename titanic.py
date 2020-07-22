@@ -164,7 +164,7 @@ for dataset in combine:
 train = train.drop(['FareBand'], axis=1)
 combine = [train, test]
 
-print(train.head())
+# print(train.head())
 # print(test.head())
 
 train = train.to_numpy()
@@ -197,19 +197,19 @@ x_train, x_validation, y_train, y_validation = train_test_split( x_train.T, y_tr
 model = Sequential([
     Input(7),
     
-    Dense(20, kernel_initializer=he_normal()),
+    Dense(10, kernel_initializer=he_normal()),
     Activation('relu'),
     
     Dense(40, kernel_initializer=he_normal()),
     Activation('relu'),
     
-    Dense(100, kernel_initializer=he_normal()),
+    Dense(50, kernel_initializer=he_normal()),
     Activation('relu'),
-    
+
     Dense(40, kernel_initializer=he_normal()),
     Activation('relu'),
     
-    Dense(20, kernel_initializer=he_normal()),
+    Dense(10, kernel_initializer=he_normal()),
     Activation('relu'),
 
     Dense(1, kernel_initializer=he_normal()),
@@ -217,7 +217,6 @@ model = Sequential([
 ])
 
 # Compile the model to use categorial cross entropy loss, 
-# and Mini-Batch Stochastic Gradient Descent Optimizer with a learning rate of 0.1
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 # Train the model
@@ -230,10 +229,19 @@ history = model.fit(x_train,
 
 print( history.history.keys() )
 
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
+# plt.plot(history.history['accuracy'])
+# plt.plot(history.history['val_accuracy'])
+# plt.title('model accuracy')
+# plt.ylabel('accuracy')
+# plt.xlabel('epoch')
+# plt.legend(['train', 'test'], loc='upper left')
+# plt.show()
+
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
