@@ -2,8 +2,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
-import tensorflow as tf
-import keras
+
+from sklearn.model_selection import train_test_split
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Activation, Input
+from tensorflow.keras.initializers import RandomNormal, he_normal
+from tensorflow.keras import optimizers
+
 import os
 
 os.chdir(os.path.dirname(__file__))
@@ -105,6 +111,8 @@ for dataset in combine:
     # Seniors
     dataset.loc[ dataset['Age'] > 65, 'Age' ] = 5
 
+    dataset['Age'] = dataset['Age'].astype(int)
+
 # print(train['Age'].unique())
 
 # Check the average survival rate based on age ranges.
@@ -138,13 +146,97 @@ for dataset in combine:
 
 # print(train[['Embarked', 'Survived']].groupby(['Embarked']).mean())
 
-# print( train.loc[ train['Age'].isnull() ] )
+
+test['Fare'].fillna(test['Fare'].dropna().median(), inplace=True)
+
+train['FareBand'] = pd.qcut(train['Fare'], 4)
+
+#print(train[['FareBand', 'Survived']].groupby(['FareBand'], as_index=False).mean().sort_values( by ='FareBand', ascending=True ))
+#print(train.head())
+
+for dataset in combine:
+    dataset.loc[ dataset['Fare'] <= 7.91, 'Fare' ] = 0
+    dataset.loc[ (dataset['Fare'] > 7.91) & (dataset['Fare'] <= 14.454), 'Fare' ] = 1 
+    dataset.loc[ (dataset['Fare'] > 14.454) & (dataset['Fare'] <= 31.0), 'Fare' ] = 2
+    dataset.loc[ (dataset['Fare'] > 31.0), 'Fare' ] = 3
+    dataset['Fare'] = dataset['Fare'].astype(int)
+
+train = train.drop(['FareBand'], axis=1)
+combine = [train, test]
 
 print(train.head())
-print(test.head())
+# print(test.head())
 
+train = train.to_numpy()
 
+train = train.T
 
+#print(train)
+
+# print(train.shape)
+# print(test.shape)
+
+# print(train.shape)
+
+x_train = train[1:, :]
+y_train = train[0, :].reshape(1, x_train.shape[1])
+
+# print(x_train.shape)
+# print(y_train.T.shape)
+
+# print(y_train)
+
+x_train, x_validation, y_train, y_validation = train_test_split( x_train.T, y_train.T, test_size = 0.3, random_state=0 )
+
+# x_train = x_train.T
+# y_train = y_train.T
+
+# x_validation = x_validation.T
+# y_validation = y_validation.T
+
+model = Sequential([
+    Input(7),
+    
+    Dense(20, kernel_initializer=he_normal()),
+    Activation('relu'),
+    
+    Dense(40, kernel_initializer=he_normal()),
+    Activation('relu'),
+    
+    Dense(100, kernel_initializer=he_normal()),
+    Activation('relu'),
+    
+    Dense(40, kernel_initializer=he_normal()),
+    Activation('relu'),
+    
+    Dense(20, kernel_initializer=he_normal()),
+    Activation('relu'),
+
+    Dense(1, kernel_initializer=he_normal()),
+    Activation('sigmoid'),
+])
+
+# Compile the model to use categorial cross entropy loss, 
+# and Mini-Batch Stochastic Gradient Descent Optimizer with a learning rate of 0.1
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# Train the model
+history = model.fit(x_train, 
+                    y_train, 
+                    validation_data=(x_validation, y_validation), 
+                    epochs=50,
+                    batch_size=1
+                    )
+
+print( history.history.keys() )
+
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
 
 
 
