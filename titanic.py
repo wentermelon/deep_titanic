@@ -6,7 +6,7 @@ import seaborn as sb
 from sklearn.model_selection import train_test_split
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Activation, Input
+from tensorflow.keras.layers import Dense, Activation, Input, Dropout
 from tensorflow.keras.initializers import RandomNormal, he_normal
 from tensorflow.keras import optimizers
 
@@ -196,46 +196,67 @@ x_train, x_validation, y_train, y_validation = train_test_split( x_train.T, y_tr
 
 model = Sequential([
     Input(7),
-    
-    Dense(10, kernel_initializer=he_normal()),
-    Activation('relu'),
-    
-    Dense(40, kernel_initializer=he_normal()),
-    Activation('relu'),
-    
-    Dense(50, kernel_initializer=he_normal()),
+
+    Dense(512, kernel_initializer=he_normal()),
     Activation('relu'),
 
-    Dense(40, kernel_initializer=he_normal()),
+    Dropout(0.5),
+
+    Dense(1024, kernel_initializer=he_normal()),
     Activation('relu'),
+
+    Dropout(0.5),
     
-    Dense(10, kernel_initializer=he_normal()),
+    Dense(1024, kernel_initializer=he_normal()),
     Activation('relu'),
+
+    Dropout(0.5),
+    
+    Dense(1024, kernel_initializer=he_normal()),
+    Activation('relu'),
+
+    Dropout(0.5),
+    
+    Dense(512, kernel_initializer=he_normal()),
+    Activation('relu'),
+
+    Dropout(0.5),
 
     Dense(1, kernel_initializer=he_normal()),
     Activation('sigmoid'),
 ])
 
+lr_schedule = optimizers.schedules.InverseTimeDecay(
+    0.001,
+    decay_steps=623*5,
+    decay_rate=1,
+    staircase=False
+)
+
+
 # Compile the model to use categorial cross entropy loss, 
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.compile(loss='binary_crossentropy', 
+              optimizer=optimizers.Adam(lr_schedule),
+              metrics=['accuracy']
+              )
 
 # Train the model
 history = model.fit(x_train, 
                     y_train, 
                     validation_data=(x_validation, y_validation), 
-                    epochs=50,
+                    epochs=100,
                     batch_size=1
                     )
 
-print( history.history.keys() )
+# print( history.history.keys() )
 
-# plt.plot(history.history['accuracy'])
-# plt.plot(history.history['val_accuracy'])
-# plt.title('model accuracy')
-# plt.ylabel('accuracy')
-# plt.xlabel('epoch')
-# plt.legend(['train', 'test'], loc='upper left')
-# plt.show()
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='upper left')
+plt.show()
 
 # summarize history for loss
 plt.plot(history.history['loss'])
