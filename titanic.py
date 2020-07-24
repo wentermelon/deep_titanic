@@ -9,6 +9,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation, Input, Dropout
 from tensorflow.keras.initializers import RandomNormal, he_normal
 from tensorflow.keras import optimizers
+from tensorflow.keras import regularizers
 
 import os
 
@@ -164,61 +165,39 @@ for dataset in combine:
 train = train.drop(['FareBand'], axis=1)
 combine = [train, test]
 
-# print(train.head())
-# print(test.head())
-
 train = train.to_numpy()
 
 train = train.T
 
-#print(train)
-
-# print(train.shape)
-# print(test.shape)
-
-# print(train.shape)
-
 x_train = train[1:, :]
 y_train = train[0, :].reshape(1, x_train.shape[1])
 
-# print(x_train.shape)
-# print(y_train.T.shape)
-
-# print(y_train)
-
 x_train, x_validation, y_train, y_validation = train_test_split( x_train.T, y_train.T, test_size = 0.3, random_state=0 )
 
-# x_train = x_train.T
-# y_train = y_train.T
-
-# x_validation = x_validation.T
-# y_validation = y_validation.T
 
 model = Sequential([
     Input(7),
 
-    Dense(512, kernel_initializer=he_normal()),
+    Dense(  512, 
+            kernel_initializer=he_normal(),
+            kernel_regularizer=regularizers.l2(0.0001)
+            ),
+
     Activation('relu'),
 
     Dropout(0.5),
 
-    Dense(1024, kernel_initializer=he_normal()),
-    Activation('relu'),
-
-    Dropout(0.5),
-    
-    Dense(1024, kernel_initializer=he_normal()),
-    Activation('relu'),
-
-    Dropout(0.5),
-    
-    Dense(1024, kernel_initializer=he_normal()),
-    Activation('relu'),
+    Dense(  512, 
+            kernel_initializer=he_normal(),
+            kernel_regularizer=regularizers.l2(0.0001)
+            ),
 
     Dropout(0.5),
     
-    Dense(512, kernel_initializer=he_normal()),
-    Activation('relu'),
+    Dense(  512, 
+            kernel_initializer=he_normal(),
+            kernel_regularizer=regularizers.l2(0.0001)
+            ),
 
     Dropout(0.5),
 
@@ -228,11 +207,10 @@ model = Sequential([
 
 lr_schedule = optimizers.schedules.InverseTimeDecay(
     0.001,
-    decay_steps=623*5,
+    decay_steps=623*100,
     decay_rate=1,
     staircase=False
 )
-
 
 # Compile the model to use categorial cross entropy loss, 
 model.compile(loss='binary_crossentropy', 
@@ -244,7 +222,7 @@ model.compile(loss='binary_crossentropy',
 history = model.fit(x_train, 
                     y_train, 
                     validation_data=(x_validation, y_validation), 
-                    epochs=100,
+                    epochs=500,
                     batch_size=1
                     )
 
@@ -267,5 +245,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
 plt.show()
 
-
+test = test.to_numpy()
+print(np.rint(model.predict(test)))
 
