@@ -1,0 +1,13 @@
+78% configuration
+
+512
+512
+1024
+1024
+
+dropout 0.5
+l2 regularization 0.001
+
+test_size 0.3
+
+epochs 50

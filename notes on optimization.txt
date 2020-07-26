@@ -1,7 +1,0 @@
-depth has minor impact on accuracy
-	increased depth may actually decrease accuracy assuming width/amt of nodes are same
-	i.e. 10 nodes x 5 layers >= 10 nodes 10 layers
-
-
-width has big impact on accuracy especially with validation accuracy
-

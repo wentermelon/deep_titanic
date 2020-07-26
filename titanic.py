@@ -50,7 +50,15 @@ for dataset in combine:
 
 #print(train[['Title', 'Survived']].groupby(['Title'], as_index=False).mean())
 
+
+
 # Dropping Name and PassengerId features - not useful for analysis.
+
+
+test_passengers = test['PassengerId'].to_numpy()
+
+test_passengers =  test_passengers.reshape(test_passengers.size, 1)
+
 train = train.drop( ['Name', 'PassengerId'], axis=1 )
 test = test.drop( ['Name', 'PassengerId'], axis=1 )
 combine = [ train, test ]
@@ -172,7 +180,7 @@ train = train.T
 x_train = train[1:, :]
 y_train = train[0, :].reshape(1, x_train.shape[1])
 
-x_train, x_validation, y_train, y_validation = train_test_split( x_train.T, y_train.T, test_size = 0.3, random_state=0 )
+x_train, x_validation, y_train, y_validation = train_test_split( x_train.T, y_train.T, test_size = 0.25, random_state=0 )
 
 
 model = Sequential([
@@ -180,7 +188,7 @@ model = Sequential([
 
     Dense(  512, 
             kernel_initializer=he_normal(),
-            kernel_regularizer=regularizers.l2(0.0001)
+            kernel_regularizer=regularizers.l2(0.01)
             ),
 
     Activation('relu'),
@@ -189,42 +197,58 @@ model = Sequential([
 
     Dense(  512, 
             kernel_initializer=he_normal(),
-            kernel_regularizer=regularizers.l2(0.0001)
+            kernel_regularizer=regularizers.l2(0.01)
             ),
+    
+    Activation('relu'),
 
     Dropout(0.5),
     
-    Dense(  512, 
+    Dense(  1024, 
             kernel_initializer=he_normal(),
-            kernel_regularizer=regularizers.l2(0.0001)
+            kernel_regularizer=regularizers.l2(0.01)
             ),
+
+    Activation('relu'),
+
+    Dropout(0.5),
+
+    Dense(  1024, 
+            kernel_initializer=he_normal(),
+            kernel_regularizer=regularizers.l2(0.01)
+            ),
+
+    Activation('relu'),
 
     Dropout(0.5),
 
     Dense(1, kernel_initializer=he_normal()),
     Activation('sigmoid'),
-])
+    ])
 
 lr_schedule = optimizers.schedules.InverseTimeDecay(
     0.001,
     decay_steps=623*100,
     decay_rate=1,
     staircase=False
-)
+    )
 
 # Compile the model to use categorial cross entropy loss, 
-model.compile(loss='binary_crossentropy', 
-              optimizer=optimizers.Adam(lr_schedule),
-              metrics=['accuracy']
-              )
+model.compile(  
+    loss='binary_crossentropy', 
+    optimizer='adam',
+    # optimizer=optimizers.Adam(lr_schedule),
+    metrics=['accuracy']
+    )
 
 # Train the model
-history = model.fit(x_train, 
-                    y_train, 
-                    validation_data=(x_validation, y_validation), 
-                    epochs=500,
-                    batch_size=1
-                    )
+history = model.fit(
+    x_train, 
+    y_train, 
+    validation_data=(x_validation, y_validation), 
+    epochs=50,
+    batch_size=1
+    )
 
 # print( history.history.keys() )
 
@@ -234,7 +258,8 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
-plt.show()
+# plt.show()
+plt.savefig('accuracy.png')
 
 # summarize history for loss
 plt.plot(history.history['loss'])
@@ -243,8 +268,13 @@ plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='upper left')
-plt.show()
+# plt.show()
+plt.savefig('loss.png')
 
-test = test.to_numpy()
-print(np.rint(model.predict(test)))
+x_test = test.to_numpy()
 
+y_test = np.rint(model.predict(x_test))
+
+prediction = pd.DataFrame( np.column_stack([test_passengers, y_test]) ).astype(int)
+
+prediction.to_csv('prediction.csv', header=['PassengerId', 'Survived'], index=False)
