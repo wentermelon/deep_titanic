@@ -186,57 +186,59 @@ x_train, x_validation, y_train, y_validation = train_test_split( x_train.T, y_tr
 model = Sequential([
     Input(7),
 
-    Dense(  512, 
+    Dense(  32, 
             kernel_initializer=he_normal(),
-            kernel_regularizer=regularizers.l2(0.01)
+            kernel_regularizer=regularizers.l2(0.001)
             ),
 
     Activation('relu'),
 
     Dropout(0.5),
 
-    Dense(  512, 
+    Dense(  32, 
             kernel_initializer=he_normal(),
-            kernel_regularizer=regularizers.l2(0.01)
+            kernel_regularizer=regularizers.l2(0.001)
             ),
     
     Activation('relu'),
 
     Dropout(0.5),
     
-    Dense(  1024, 
+    Dense(  64, 
             kernel_initializer=he_normal(),
-            kernel_regularizer=regularizers.l2(0.01)
+            kernel_regularizer=regularizers.l2(0.001)
             ),
 
     Activation('relu'),
 
     Dropout(0.5),
 
-    Dense(  1024, 
+    Dense(  64, 
             kernel_initializer=he_normal(),
-            kernel_regularizer=regularizers.l2(0.01)
+            kernel_regularizer=regularizers.l2(0.001)
             ),
-
-    Activation('relu'),
 
     Dropout(0.5),
 
-    Dense(1, kernel_initializer=he_normal()),
+    Activation('relu'),
+
+    Dense(  1, 
+            ),
+
     Activation('sigmoid'),
+    
     ])
 
 lr_schedule = optimizers.schedules.InverseTimeDecay(
     0.001,
-    decay_steps=623*100,
-    decay_rate=1,
-    staircase=False
+    decay_steps=668*25,
+    decay_rate=0.5,
     )
 
 # Compile the model to use categorial cross entropy loss, 
 model.compile(  
     loss='binary_crossentropy', 
-    optimizer='adam',
+    optimizer='nadam',
     # optimizer=optimizers.Adam(lr_schedule),
     metrics=['accuracy']
     )
@@ -246,7 +248,7 @@ history = model.fit(
     x_train, 
     y_train, 
     validation_data=(x_validation, y_validation), 
-    epochs=50,
+    epochs=300,
     batch_size=1
     )
 

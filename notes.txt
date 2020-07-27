@@ -1,13 +1,16 @@
 78% configuration
 
-512
-512
-1024
-1024
-
+32
+32
+64
+64
 dropout 0.5
 l2 regularization 0.001
 
-test_size 0.3
+test_size 0.25
 
-epochs 50
+epochs 200
+
+
+batch_size = # of samples per gradient update
+	since batch_size = 1 in the model, it means the gradient is continuously updated
