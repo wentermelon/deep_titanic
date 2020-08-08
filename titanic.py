@@ -6,10 +6,11 @@ import seaborn as sb
 from sklearn.model_selection import train_test_split
 
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Activation, Input, Dropout
+from tensorflow.keras.layers import Dense, Activation, Input, Dropout, LeakyReLU
 from tensorflow.keras.initializers import RandomNormal, he_normal
 from tensorflow.keras import optimizers
 from tensorflow.keras import regularizers
+
 
 import os
 
@@ -180,7 +181,12 @@ train = train.T
 x_train = train[1:, :]
 y_train = train[0, :].reshape(1, x_train.shape[1])
 
-x_train, x_validation, y_train, y_validation = train_test_split( x_train.T, y_train.T, test_size = 0.25, random_state=0 )
+x_train1, x_validation1, y_train1, y_validation1 = train_test_split(    x_train.T, 
+                                                                        y_train.T, 
+                                                                        test_size = 0.25, 
+                                                                        random_state=0, 
+                                                                        shuffle=True 
+                                                                        )
 
 
 model = Sequential([
@@ -191,7 +197,7 @@ model = Sequential([
             kernel_regularizer=regularizers.l2(0.001)
             ),
 
-    Activation('relu'),
+    LeakyReLU(),
 
     Dropout(0.5),
 
@@ -200,7 +206,8 @@ model = Sequential([
             kernel_regularizer=regularizers.l2(0.001)
             ),
     
-    Activation('relu'),
+    LeakyReLU(),
+
 
     Dropout(0.5),
     
@@ -209,7 +216,7 @@ model = Sequential([
             kernel_regularizer=regularizers.l2(0.001)
             ),
 
-    Activation('relu'),
+    LeakyReLU(),
 
     Dropout(0.5),
 
@@ -220,7 +227,7 @@ model = Sequential([
 
     Dropout(0.5),
 
-    Activation('relu'),
+    LeakyReLU(),
 
     Dense(  1, 
             ),
@@ -229,11 +236,11 @@ model = Sequential([
     
     ])
 
-lr_schedule = optimizers.schedules.InverseTimeDecay(
-    0.001,
-    decay_steps=668*25,
-    decay_rate=0.5,
-    )
+# lr_schedule = optimizers.schedules.InverseTimeDecay(
+#     0.001,
+#     decay_steps=668*25,
+#     decay_rate=0.5,
+#     )
 
 # Compile the model to use categorial cross entropy loss, 
 model.compile(  
@@ -243,40 +250,320 @@ model.compile(
     metrics=['accuracy']
     )
 
+print("Training Model #1 ...")
+
 # Train the model
 history = model.fit(
-    x_train, 
-    y_train, 
-    validation_data=(x_validation, y_validation), 
-    epochs=300,
+    x_train1, 
+    y_train1, 
+    validation_data=(x_validation1, y_validation1), 
+    epochs=100,
     batch_size=1
     )
 
+print("Finished training Model #1...")
+
+x_train1, x_validation1, y_train1, y_validation1 = train_test_split(    x_train.T, 
+                                                                        y_train.T, 
+                                                                        test_size = 0.25, 
+                                                                        random_state=1, 
+                                                                        shuffle=True 
+                                                                        )
+
+history = model.fit(
+    x_train1, 
+    y_train1, 
+    validation_data=(x_validation1, y_validation1), 
+    epochs=100,
+    batch_size=1
+    )
+
+x_train1, x_validation1, y_train1, y_validation1 = train_test_split(    x_train.T, 
+                                                                        y_train.T, 
+                                                                        test_size = 0.25, 
+                                                                        random_state=2, 
+                                                                        shuffle=True 
+                                                                        )
+
+history = model.fit(
+    x_train1, 
+    y_train1, 
+    validation_data=(x_validation1, y_validation1), 
+    epochs=100,
+    batch_size=1
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # print( history.history.keys() )
 
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-# plt.show()
-plt.savefig('accuracy.png')
+# x_train2, x_validation2, y_train2, y_validation2 = train_test_split(    x_train.T, 
+#                                                                         y_train.T, 
+#                                                                         test_size = 0.25, 
+#                                                                         random_state=1, 
+#                                                                         shuffle=True 
+#                                                                         )
 
-# summarize history for loss
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('loss')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='upper left')
-# plt.show()
-plt.savefig('loss.png')
+# model2 = Sequential([
+#     Input(7),
+
+#     Dense(  32, 
+#             kernel_initializer=he_normal(),
+#             kernel_regularizer=regularizers.l2(0.001)
+#             ),
+
+#     LeakyReLU(),
+
+#     Dropout(0.5),
+
+#     Dense(  32, 
+#             kernel_initializer=he_normal(),
+#             kernel_regularizer=regularizers.l2(0.001)
+#             ),
+    
+#     LeakyReLU(),
+
+
+#     Dropout(0.5),
+    
+#     Dense(  64, 
+#             kernel_initializer=he_normal(),
+#             kernel_regularizer=regularizers.l2(0.001)
+#             ),
+
+#     LeakyReLU(),
+
+#     Dropout(0.5),
+
+#     Dense(  64, 
+#             kernel_initializer=he_normal(),
+#             kernel_regularizer=regularizers.l2(0.001)
+#             ),
+
+#     Dropout(0.5),
+
+#     # Activation('relu'),
+#     LeakyReLU(),
+
+#     Dense(  1, 
+#             ),
+
+#     Activation('sigmoid'),
+    
+#     ])
+
+# # Compile the model to use categorial cross entropy loss, 
+# model2.compile(  
+#     loss='binary_crossentropy', 
+#     optimizer='nadam',
+#     # optimizer=optimizers.Adam(lr_schedule),
+#     metrics=['accuracy']
+#     )
+
+# print("Training Model #2...")
+
+# # Train the model
+# history2 = model.fit(
+#     x_train2, 
+#     y_train2, 
+#     validation_data=(x_validation2, y_validation2), 
+#     epochs=300,
+#     batch_size=1
+#     )
+
+# print("Finished training Model #2...")
+
+# x_train3, x_validation3, y_train3, y_validation3 = train_test_split(    x_train.T, 
+#                                                                         y_train.T, 
+#                                                                         test_size = 0.25, 
+#                                                                         random_state=2, 
+#                                                                         shuffle=True 
+#                                                                         )
+
+# model3 = Sequential([
+#     Input(7),
+
+#     Dense(  32, 
+#             kernel_initializer=he_normal(),
+#             kernel_regularizer=regularizers.l2(0.001)
+#             ),
+
+#     LeakyReLU(),
+
+#     Dropout(0.5),
+
+#     Dense(  32, 
+#             kernel_initializer=he_normal(),
+#             kernel_regularizer=regularizers.l2(0.001)
+#             ),
+    
+#     LeakyReLU(),
+
+
+#     Dropout(0.5),
+    
+#     Dense(  64, 
+#             kernel_initializer=he_normal(),
+#             kernel_regularizer=regularizers.l2(0.001)
+#             ),
+
+#     LeakyReLU(),
+
+#     Dropout(0.5),
+
+#     Dense(  64, 
+#             kernel_initializer=he_normal(),
+#             kernel_regularizer=regularizers.l2(0.001)
+#             ),
+
+#     Dropout(0.5),
+
+#     LeakyReLU(),
+
+#     Dense(  1, 
+#             ),
+
+#     Activation('sigmoid'),
+    
+#     ])
+
+# # Compile the model to use categorial cross entropy loss, 
+# model3.compile(  
+#     loss='binary_crossentropy', 
+#     optimizer='nadam',
+#     # optimizer=optimizers.Adam(lr_schedule),
+#     metrics=['accuracy']
+#     )
+
+# print("Training Model #3...")
+
+# # Train the model
+# history3 = model.fit(
+#     x_train3, 
+#     y_train3, 
+#     validation_data=(x_validation3, y_validation3), 
+#     epochs=300,
+#     batch_size=1
+#     )
+
+# print("Finished training Model #3...")
 
 x_test = test.to_numpy()
 
 y_test = np.rint(model.predict(x_test))
 
+# y_test2 = np.rint(model2.predict(x_test))
+# y_test3 = np.rint(model3.predict(x_test))
+
+# vote = np.column_stack([y_test, y_test2, y_test3])
+# vote = np.sum(vote, axis=1)
+# vote = np.rint(vote/3)
+
+# prediction = pd.DataFrame( np.column_stack([test_passengers, vote]) ).astype(int)
+
+# prediction.to_csv('prediction.csv', header=['PassengerId', 'Survived'], index=False)
+
 prediction = pd.DataFrame( np.column_stack([test_passengers, y_test]) ).astype(int)
 
 prediction.to_csv('prediction.csv', header=['PassengerId', 'Survived'], index=False)
+
+# plt.plot(history.history['accuracy'])
+# plt.plot(history.history['val_accuracy'])
+# plt.title('model accuracy')
+# plt.ylabel('accuracy')
+# plt.xlabel('epoch')
+# plt.legend(['train', 'test'], loc='upper left')
+# # plt.show()
+# plt.savefig('accuracy.png')
+
+# # summarize history for loss
+# plt.plot(history.history['loss'])
+# plt.plot(history.history['val_loss'])
+# plt.title('model loss')
+# plt.ylabel('loss')
+# plt.xlabel('epoch')
+# plt.legend(['train', 'test'], loc='upper left')
+# # plt.show()
+# plt.savefig('loss.png')
