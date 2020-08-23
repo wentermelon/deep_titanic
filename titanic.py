@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sb
 
 from sklearn.model_selection import train_test_split
 
@@ -11,10 +10,6 @@ from tensorflow.keras.initializers import RandomNormal, he_normal
 from tensorflow.keras import optimizers
 from tensorflow.keras import regularizers
 
-
-import os
-
-os.chdir(os.path.dirname(__file__))
 
 train = pd.read_csv(r'train.csv')
 test = pd.read_csv("test.csv")
@@ -84,14 +79,6 @@ female_pclass1 = train.loc[ (train['Sex'] == 1) & (train['Pclass'] == 1) , 'Age'
 female_pclass2 = train.loc[ (train['Sex'] == 1) & (train['Pclass'] == 2) , 'Age'].mean().astype(int)
 female_pclass3 = train.loc[ (train['Sex'] == 1) & (train['Pclass'] == 3) , 'Age'].mean().astype(int)
 
-# print( "Average Age for Male (Sex=0) in Pclass=1: {0}".format(male_pclass1))
-# print( "Average Age for Male (Sex=0) in Pclass=2: {0}".format(male_pclass2))
-# print( "Average Age for Male (Sex=0) in Pclass=3: {0}".format(male_pclass3))
-# print()
-# print( "Average Age for Female (Sex=1) in Pclass=1: {0}".format(female_pclass1))
-# print( "Average Age for Female (Sex=1) in Pclass=2: {0}".format(female_pclass2))
-# print( "Average Age for Female (Sex=1) in Pclass=3: {0}".format(female_pclass3))
-
 for dataset in combine:
     dataset.loc[ (dataset['Sex'] == 0) & (dataset['Pclass'] == 1) & (dataset['Age'].isna()), 'Age' ] = male_pclass1
     dataset.loc[ (dataset['Sex'] == 0) & (dataset['Pclass'] == 2) & (dataset['Age'].isna()), 'Age' ] = male_pclass2
@@ -123,11 +110,6 @@ for dataset in combine:
 
     dataset['Age'] = dataset['Age'].astype(int)
 
-# print(train['Age'].unique())
-
-# Check the average survival rate based on age ranges.
-# print(train[['Age', 'Survived']].groupby(['Age'], as_index=False).mean())
-
 # # Create new feature based on family size:
 # # SibSp -> Siblings + Spouse(s)
 # # Parch -> Parents + Children
@@ -135,9 +117,6 @@ for dataset in combine:
 for dataset in combine:
     dataset['FamilySize'] = dataset['SibSp'] + dataset['Parch'] + 1
  
-# Check the average survival rate based on family size.
-# print(train[['FamilySize', 'Survived']].groupby(['FamilySize'], as_index=False).mean())
-
 # Remove SibSp and Parch features because it is accounted for in FamilySize.
 train = train.drop( ['Parch', 'SibSp'], axis=1)
 test = test.drop( ['Parch', 'SibSp'], axis=1)
@@ -153,14 +132,9 @@ for dataset in combine:
     dataset['Embarked'] = dataset['Embarked'].fillna(most_frequent_port)
     dataset['Embarked'] = dataset['Embarked'].map(port_mapping).astype(int)
 
-# print(train[['Embarked', 'Survived']].groupby(['Embarked']).mean())
-
-
 test['Fare'].fillna(test['Fare'].dropna().median(), inplace=True)
 
 train['FareBand'] = pd.qcut(train['Fare'], 4)
-
-#print(train[['FareBand', 'Survived']].groupby(['FareBand'], as_index=False).mean().sort_values( by ='FareBand', ascending=True ))
 
 for dataset in combine:
     dataset.loc[ dataset['Fare'] <= 7.91, 'Fare' ] = 0
@@ -190,7 +164,7 @@ x_train, x_validation, y_train, y_validation = train_test_split(    x_train.T,
 model = Sequential([
     Input(7),
 
-    Dense(  256, 
+    Dense(  128, 
             kernel_initializer=he_normal(),
             kernel_regularizer=regularizers.l2(0.001)
             ),
@@ -199,7 +173,7 @@ model = Sequential([
 
     Dropout(0.5),
 
-    Dense(  256, 
+    Dense(  128, 
             kernel_initializer=he_normal(),
             kernel_regularizer=regularizers.l2(0.001)
             ),
@@ -209,7 +183,7 @@ model = Sequential([
 
     Dropout(0.5),
     
-    Dense(  256, 
+    Dense(  128, 
             kernel_initializer=he_normal(),
             kernel_regularizer=regularizers.l2(0.001)
             ),
